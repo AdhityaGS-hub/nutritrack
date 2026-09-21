@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriTrack — Modern Nutrition & Diet Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              dark: '#064e3b'
+            },
+            teal: {
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+    .dark .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen antialiased transition-colors duration-200">
+
+  <!-- Main Container -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Desktop Sidebar Navigation -->
+    <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 p-5 space-y-6">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-brand-500 rounded-xl text-white">
+          <i data-lucide="leaf" class="w-6 h-6"></i>
+        </div>
+        <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-600 to-teal-500 bg-clip-text text-transparent">NutriTrack</span>
+      </div>
+
+      <nav class="flex-1 space-y-1">
+        <button onclick="switchTab('dashboard')" class="nav-btn active w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-brand-50 text-brand-600 dark:bg-slate-700 dark:text-brand-400">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('meals')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="utensils" class="w-5 h-5"></i>
+          <span>Meals</span>
+        </button>
+        <button onclick="switchTab('analytics')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+          <span>Analytics</span>
+        </button>
+        <button onclick="switchTab('goals')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="target" class="w-5 h-5"></i>
+          <span>Goals</span>
+        </button>
+        <button onclick="switchTab('water')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="droplet" class="w-5 h-5"></i>
+          <span>Water</span>
+        </button>
+        <button onclick="switchTab('calendar')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="calendar" class="w-5 h-5"></i>
+          <span>Calendar</span>
+        </button>
+        <button onclick="switchTab('privacy')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+          <span>Privacy & Data</span>
+        </button>
+      </nav>
+
+      <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+        <button onclick="switchTab('profile')" class="w-full flex items-center space-x-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="w-10 h-10 rounded-full object-cover" alt="Profile">
+          <div class="text-left overflow-hidden">
+            <p class="text-sm font-semibold truncate">Ananya Sharma</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Pro Member</p>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto pb-20 md:pb-8">
+      
+      <!-- Top Header Navigation -->
+      <header class="sticky top-0 z-10 glass border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 id="page-title" class="text-xl font-bold">Dashboard</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Monday, Sep 21, 2026</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button onclick="openFoodModal()" class="hidden sm:flex items-center space-x-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Log Food</span>
+          </button>
+          
+          <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all">
+            <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+          </button>
+          
+          <button class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all relative">
+            <i data-lucide="bell" class="w-4 h-4"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div id="views" class="p-6 max-w-7xl mx-auto space-y-6">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboard-view" class="space-y-6">
+          
+          <!-- Daily Overview Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Main Calorie Ring Card -->
+            <div class="lg:col-span-1 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center">
+              <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Calorie Budget</h2>
+              
+              <div class="relative w-48 h-48 flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-slate-100 dark:text-slate-700" fill="transparent"/>
+                  <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" class="text-brand-500 transition-all duration-1000 ease-out" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="72.8" stroke-linecap="round"/>
+                </svg>
+                <div class="absolute text-center">
+                  <span class="text-3xl font-extrabold" id="consumed-cal">1,420</span>
+                  <span class="text-xs text-slate-400 block">/ 2,000 kcal</span>
+                  <span class="text-xs font-semibold text-brand-600 dark:text-brand-400 mt-1 inline-block">580 kcal remaining</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 w-full mt-6 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-center">
+                <div>
+                  <p class="text-xs text-slate-400">Consumed</p>
+                  <p class="text-base font-bold text-slate-700 dark:text-slate-200">1,420 kcal</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400">Burned</p>
+                  <p class="text-base font-bold text-teal-600 dark:text-teal-400">340 kcal</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Macros Cards Grid -->
+            <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <!-- Protein Card -->
+              <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Protein</span>
+                  <span class="text-xs font-bold text-emerald-500">68%</span>
+                </div>
+                <div class="text-2xl font-bold">82<span class="text-xs font-normal text-slate-400"> / 120g</span></div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: 68%"></div>
+                </div>
+              </div>
+
+              <!-- Carbs Card -->
+              <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Carbs</span>
+                  <span class="text-xs font-bold text-amber-500">66%</span>
+                </div>
+                <div class="text-2xl font-bold">165<span class="text-xs font-normal text-slate-400"> / 250g</span></div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div class="bg-amber-500 h-2 rounded-full" style="width: 66%"></div>
+                </div>
+              </div>
+
+              <!-- Fats Card -->
+              <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Fats</span>
+                  <span class="text-xs font-bold text-rose-500">73%</span>
+                </div>
+                <div class="text-2xl font-bold">48<span class="text-xs font-normal text-slate-400"> / 65g</span></div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div class="bg-rose-500 h-2 rounded-full" style="width: 73%"></div>
+                </div>
+              </div>
+
+              <!-- Fiber Card -->
+              <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Fiber</span>
+                  <span class="text-xs font-bold text-teal-500">70%</span>
+                </div>
+                <div class="text-2xl font-bold">21<span class="text-xs font-normal text-slate-400"> / 30g</span></div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div class="bg-teal-500 h-2 rounded-full" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <!-- Water Hydration Card -->
+              <div class="col-span-2 sm:col-span-2 bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-medium text-cyan-100">Daily Water</p>
+                  <p class="text-2xl font-bold mt-1">1.8 <span class="text-sm font-normal text-cyan-100">/ 2.5 L</span></p>
+                  <p class="text-xs text-cyan-100 mt-2">72% of target reached</p>
+                </div>
+                <button onclick="addWater(250)" class="bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-2 rounded-xl text-xs font-semibold transition-all">
+                  +250 ml
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Meals Today & Quick Water Tracking -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Logged Meals List -->
+            <div class="lg:col-span-2 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-lg">Today's Meals</h3>
+                <button onclick="openFoodModal()" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline flex items-center space-x-1">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>Add Meal</span>
+                </button>
+              </div>
+
+              <!-- Breakfast Meal Card -->
+              <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xl">🌅</span>
+                    <span class="font-semibold">Breakfast</span>
+                  </div>
+                  <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full">380 kcal</span>
+                </div>
+                
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-sm py-1">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center font-bold text-amber-600 text-xs">Idli</div>
+                      <div>
+                        <p class="font-medium text-slate-800 dark:text-slate-200">2 Steam Idlis + Sambar</p>
+                        <p class="text-xs text-slate-400">1 serving (150g)</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <span class="text-xs font-medium text-slate-500">220 kcal</span>
+                      <button class="text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lunch Meal Card -->
+              <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xl">☀️</span>
+                    <span class="font-semibold">Lunch</span>
+                  </div>
+                  <span class="text-xs font-semibold bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full">640 kcal</span>
+                </div>
+                
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-sm py-1">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center font-bold text-emerald-600 text-xs">Rice</div>
+                      <div>
+                        <p class="font-medium text-slate-800 dark:text-slate-200">Brown Rice & Paneer Curry</p>
+                        <p class="text-xs text-slate-400">1 bowl (250g)</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <span class="text-xs font-medium text-slate-500">450 kcal</span>
+                      <button class="text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Insights Widget Sidebar -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                <h3 class="font-bold">Smart Insights</h3>
+              </div>
+
+              <div class="space-y-3 text-xs">
+                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-1">
+                  <p class="font-semibold text-brand-600 dark:text-brand-400">Protein Goal Ahead</p>
+                  <p class="text-slate-500 dark:text-slate-300">Your protein intake was highest on Wednesday. Keep up the high-protein lunches!</p>
+                </div>
+
+                <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-1">
+                  <p class="font-semibold text-cyan-600 dark:text-cyan-400">Hydration Streak</p>
+                  <p class="text-slate-500 dark:text-slate-300">You hit your water goal 5 out of 7 days this week.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRIVACY & DATA SECTION -->
+        <section id="privacy-view" class="hidden space-y-6">
+          <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+            <h2 class="text-2xl font-bold">Privacy & Data Controls</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your nutrition logs, data synchronization, and privacy preferences effortlessly.</p>
+          </div>
+
+          <!-- Privacy Overview Status Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center space-x-4">
+              <div class="p-3 bg-brand-50 dark:bg-slate-700 text-brand-600 rounded-xl">
+                <i data-lucide="shield" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400">Data Privacy Status</p>
+                <p class="text-base font-bold text-slate-800 dark:text-slate-100">Protected & Encrypted</p>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center space-x-4">
+              <div class="p-3 bg-cyan-50 dark:bg-slate-700 text-cyan-600 rounded-xl">
+                <i data-lucide="cloud-check" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400">Last Synced</p>
+                <p class="text-base font-bold text-slate-800 dark:text-slate-100">Today, 09:42 AM</p>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center space-x-4">
+              <div class="p-3 bg-emerald-50 dark:bg-slate-700 text-emerald-600 rounded-xl">
+                <i data-lucide="hard-drive" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-400">Storage Location</p>
+                <p class="text-base font-bold text-slate-800 dark:text-slate-100">Local + Account Sync</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Controls Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Export & Download Data -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+              <h3 class="text-lg font-bold flex items-center space-x-2">
+                <i data-lucide="download" class="w-5 h-5 text-brand-500"></i>
+                <span>Export & Backup Data</span>
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Download a complete record of your meal logs, water intake, weight metrics, and macro targets in standard readable formats.
+              </p>
+
+              <div class="flex items-center space-x-3 pt-2">
+                <button class="flex-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center space-x-2">
+                  <i data-lucide="file-json" class="w-4 h-4"></i>
+                  <span>Export JSON</span>
+                </button>
+                <button class="flex-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center space-x-2">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Privacy Toggles -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+              <h3 class="text-lg font-bold flex items-center space-x-2">
+                <i data-lucide="sliders" class="w-5 h-5 text-brand-500"></i>
+                <span>Privacy Preferences</span>
+              </h3>
+
+              <div class="space-y-3 divide-y divide-slate-100 dark:divide-slate-700/50">
+                <div class="flex items-center justify-between pt-2">
+                  <div>
+                    <p class="text-xs font-semibold">Smart Insights Generation</p>
+                    <p class="text-xs text-slate-400">Analyze meal patterns to provide custom advice</p>
+                  </div>
+                  <input type="checkbox" checked class="w-4 h-4 text-brand-500 rounded border-slate-300 focus:ring-brand-500">
+                </div>
+
+                <div class="flex items-center justify-between pt-3">
+                  <div>
+                    <p class="text-xs font-semibold">Anonymous Analytics</p>
+                    <p class="text-xs text-slate-400">Share usage statistics to help improve app features</p>
+                  </div>
+                  <input type="checkbox" class="w-4 h-4 text-brand-500 rounded border-slate-300 focus:ring-brand-500">
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone: Clear / Delete Data -->
+            <div class="lg:col-span-2 bg-rose-50/50 dark:bg-rose-950/20 p-6 rounded-2xl border border-rose-200 dark:border-rose-900/50 space-y-4">
+              <h3 class="text-lg font-bold text-rose-600 dark:text-rose-400 flex items-center space-x-2">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                <span>Danger Zone</span>
+              </h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400">
+                Permanently wipe your logged nutrition logs or reset your personal account data. These actions cannot be undone.
+              </p>
+
+              <div class="flex flex-wrap gap-4 pt-2">
+                <button class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
+                  Delete Meal History
+                </button>
+                <button class="border border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
+                  Delete NutriTrack Account
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200 dark:border-slate-700 px-4 py-2 flex items-center justify-around z-20">
+      <button onclick="switchTab('dashboard')" class="flex flex-col items-center p-2 text-brand-600 dark:text-brand-400">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-1 font-medium">Home</span>
+      </button>
+      <button onclick="switchTab('meals')" class="flex flex-col items-center p-2 text-slate-500">
+        <i data-lucide="utensils" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-1 font-medium">Meals</span>
+      </button>
+      <button onclick="openFoodModal()" class="flex flex-col items-center p-2 bg-brand-500 text-white rounded-full shadow-lg transform -translate-y-2">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+      </button>
+      <button onclick="switchTab('water')" class="flex flex-col items-center p-2 text-slate-500">
+        <i data-lucide="droplet" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-1 font-medium">Water</span>
+      </button>
+      <button onclick="switchTab('privacy')" class="flex flex-col items-center p-2 text-slate-500">
+        <i data-lucide="shield-check" class="w-5 h-5"></i>
+        <span class="text-[10px] mt-1 font-medium">Privacy</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Add Food Modal -->
+  <div id="food-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-5">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-lg">Log Food Item</h3>
+        <button onclick="closeFoodModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Food Search Input -->
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+        <input type="text" placeholder="Search Idli, Paneer, Dosa, Chicken..." class="w-full bg-slate-100 dark:bg-slate-700/50 border-0 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+      </div>
+
+      <!-- Quick Category Chips -->
+      <div class="flex space-x-2 overflow-x-auto pb-1 text-xs">
+        <button class="bg-brand-50 dark:bg-slate-700 text-brand-600 font-semibold px-3 py-1.5 rounded-full whitespace-nowrap">Favorites</button>
+        <button class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full whitespace-nowrap">South Indian</button>
+        <button class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full whitespace-nowrap">High Protein</button>
+      </div>
+
+      <!-- Sample Food Results -->
+      <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+        <div class="p-3 border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-xl flex items-center justify-between cursor-pointer transition-colors">
+          <div>
+            <p class="text-sm font-semibold">Steam Idli (2 pieces)</p>
+            <p class="text-xs text-slate-400">150g • 120 kcal • 4g Protein</p>
+          </div>
+          <button class="p-1.5 bg-brand-50 text-brand-600 rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button>
+        </div>
+
+        <div class="p-3 border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-xl flex items-center justify-between cursor-pointer transition-colors">
+          <div>
+            <p class="text-sm font-semibold">Paneer Tikka</p>
+            <p class="text-xs text-slate-400">100g • 260 kcal • 18g Protein</p>
+          </div>
+          <button class="p-1.5 bg-brand-50 text-brand-600 rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="closeFoodModal()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl transition-all text-sm">
+          Add Selected Food
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Dark Mode Toggle logic
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Modal Control logic
+    function openFoodModal() {
+      document.getElementById('food-modal').classList.remove('hidden');
+    }
+
+    function closeFoodModal() {
+      document.getElementById('food-modal').classList.add('hidden');
+    }
+
+    // Switch View Navigation
+    function switchTab(tabName) {
+      const views = ['dashboard', 'privacy'];
+      views.forEach(v => {
+        const el = document.getElementById(`${v}-view`);
+        if (el) el.classList.add('hidden');
+      });
+
+      const selectedView = document.getElementById(`${tabName}-view`);
+      if (selectedView) {
+        selectedView.classList.remove('hidden');
+        document.getElementById('page-title').innerText = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+      }
+    }
+
+    // Quick Action Functions
+    function addWater(amount) {
+      alert(`Added ${amount}ml of water! Stay hydrated.`);
+    }
+  </script>
+
+</body>
+</html>
